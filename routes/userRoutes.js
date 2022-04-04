@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const passport = require('passport')
+const userController = require('../controllers/User/userController')
 
 
 router.get('/', (req, res) => res.send('Hello'))
@@ -29,6 +30,12 @@ router.get('/auth/linkedin/redirect', passport.authenticate('linkedin', {failure
     res.status(201).json({ message: "User Logged In successfully"})
 })
 
+
+// Password update
+router.post('/password-reset', userController.resetPassword)
+
+// Profile update
+router.post('/update-profile', userController.updateProfile)
 
 
 
