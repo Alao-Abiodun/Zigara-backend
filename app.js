@@ -7,6 +7,11 @@ const dotenv = require("dotenv");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const key = require("./utils/libs/gen-key");
+const userRoutes = require('./routes/userRoutes')
+const googlePassport = require('./controllers/User/googleController')
+const linkedinPassport = require('./controllers/User/LinkedinController')
+const passport = require('passport')
+const cookieSession =  require('cookie-session')
 
 const AppError = require("./utils/libs/appError");
 const globalErrorHandler = require("./controllers/errorController");
@@ -45,11 +50,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("views"));
 
+app.use(cookieSession({
+  maxAge: 6*60*60*1000,
+  keys: [`${process.env.cookieKey}`]
+}))
+
+// Initialize passport
+app.use(passport.initialize())
+app.use(passport.session())
+
 // Data sanitize against NoSQL Query Injection
 app.use(mongoSanitize()); // Checks the request headers, query strings, params for malicious codes
 
 // Import all routes
 // const { userRouter } = require("./routes/user/index");
+
 
 
 //default Route
@@ -67,6 +82,8 @@ app.get("/api/v1/home", (req, res) => {
 // app.use("/api/v1/user", userRouter);
 
 // adminRouter(app);
+
+app.use(userRoutes)
 
 // Unhandled Routes
 app.all("*", (req, res) => {
