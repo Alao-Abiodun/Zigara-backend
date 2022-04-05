@@ -1,6 +1,8 @@
 const validateUser = require('../../utils/validations/index')
 const bcrypt = require('bcryptjs')
 const User = require('../../models/User/userModel')
+const response = require('../../utils/libs/response')
+const Joi = require('joi')
 
 // Register Validation schema
 const registrationSchema = Joi.object({
@@ -47,7 +49,7 @@ const resetPassword = async (req, res) => {
         {$set: {password: newPasswordHash}},
         { new: true }
     )     
-    res.status(201).json({ message: "Password has been successfully updated" })
+    return response.successResMsg(res, 201, { message: "Password was successfully updated" })
 }
 
 const updateProfile = async (req, res) => {
@@ -65,10 +67,10 @@ const updateProfile = async (req, res) => {
         findUser.state = state, 
         findUser.bio = bio
 
-        await findUser.save()
-        return res.status(201).json({ message: "User profile has been updated successfully" })
+        const savedUser = await findUser.save()
+        return response.successResMsg(res, 201, { message: "User profile has been updated successfully", savedUser })
     } 
-    return res.status(400).json({ message: "User profile not found" })
+    return response.successResMsg(res, 400, { message: "User profile not found" })
 }
 
 

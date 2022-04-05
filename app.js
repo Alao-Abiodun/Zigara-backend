@@ -8,6 +8,7 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const key = require("./utils/libs/gen-key");
 const userRoutes = require('./routes/userRoutes')
+const contactRoutes = require('./routes/contactRoutes')
 const googlePassport = require('./controllers/User/googleController')
 const linkedinPassport = require('./controllers/User/LinkedinController')
 const passport = require('passport')
@@ -84,6 +85,7 @@ app.get("/api/v1/home", (req, res) => {
 // adminRouter(app);
 
 app.use(userRoutes)
+app.use(contactRoutes)
 
 // Unhandled Routes
 app.all("*", (req, res) => {

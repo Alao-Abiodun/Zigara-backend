@@ -3,9 +3,6 @@ const passport = require('passport')
 const userController = require('../controllers/User/userController')
 
 
-router.get('/', (req, res) => res.send('Hello'))
-
-
 // User google authentication routes
 router.get('/google', passport.authenticate('google', {
     scope: ['email', 'profile']
@@ -13,8 +10,6 @@ router.get('/google', passport.authenticate('google', {
 router.get('/auth/google/redirect', passport.authenticate('google'), (req, res) => {
     res.status(201).json({ message: "Login with google was successful" })
 })
-
-router.get('/google/redirect', (req, res) => {})
 
 
 // LinkedIn login and authentication
@@ -38,7 +33,7 @@ router.post('/password-reset', userController.resetPassword)
 router.post('/update-profile', userController.updateProfile)
 
 
-
 router.get('/logout', (req, res) => res.send("logging out"))
+
 
 module.exports = router
