@@ -4,28 +4,37 @@ const bcrypt = require('bcryptjs');
 
 
 const userSchema = new mongoose.Schema({
-    firstname: String,
-    lastname: String,
-    email: String,
-    password: String,
-    passwordConfirm: {
+    firstname: {
         type: String,
-        validate: {
-            validator: function (val) {
-                return val === this.password
-            },
-            message: 'Passwords are not the same'
-        }
+        required: [true, 'Firstname can not be empty'],
     },
-    phonenumber: Number,
+    lastname: {
+        type: String,
+        required: [true, 'Lastname can not be empty'],
+    },
+    email: {
+        type: String,
+        required: [true, 'Please provide us your email'],
+        unique: true,
+        lowercase: true,
+        validate: [validator.isEmail, 'Please put a valid email']
+    },
+    password: {
+        type: String,
+        required: [true, 'Provide a password'],
+        select: false
+    },
+    phonenumber: {
+        type: Number,
+        required: [true, 'Provide your phone number']
+    },
     country: String,
     state: String,
     bio: String,
     profilephoto: String,
     googleId: String,
     linkedIn: String,
-    facebookId: String,
-    userId: String
+    facebookId: String
 })
 
 userSchema.pre('save', async function (next) {
@@ -34,7 +43,6 @@ userSchema.pre('save', async function (next) {
     //hash password
     this.password = await bcrypt.hash(this.password, 12);
 
-    this.passwordConfirm = undefined;
     next();
 });
 
