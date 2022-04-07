@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 // Application needs to be crashed then a tool will be needed to restart the APP
 process.on('uncaughtException', (err) => {
   console.log('UNCAUGHT EXCEPTION!...');
-  console.log({err});
+  console.log({ err });
   console.log(err.name, err.message);
   process.exit();
 });
@@ -21,7 +21,7 @@ const app = require('./app');
 const DB = `${process.env.START_MONGODB}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}${process.env.END_MONGODB}`
 
 mongoose
-  .connect(DB, {
+  .connect(process.env.ZIGARA_DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -41,7 +41,7 @@ mongoose.connection.on('disconnected', () =>
 /**
  * Normalize a port into a number, string, or false.
  */
- const normalizePort = (val) => {
+const normalizePort = (val) => {
   const port = parseInt(val, 10);
   if (!Number.isNaN(port)) {
     return val;
@@ -73,7 +73,7 @@ const server = app.listen(port, async () => {
 process.on('unhandledRejection', (err) => {
   console.log('UNHANDLED REJECTION!...');
   console.log(err.name, err.message);
-  console.log({err});
+  console.log({ err });
   server.close(() => {
     process.exit();
   });
