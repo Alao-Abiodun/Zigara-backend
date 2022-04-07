@@ -12,7 +12,6 @@ const authRouter = require('./routes/user');
 const AppError = require("./utils/libs/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const { successResMsg } = require("./utils/libs/response");
-const bodyParser = require("body-parser");
 
 dotenv.config();
 
@@ -43,7 +42,7 @@ app.use(cors());
 
 app.set("view engine", "ejs");
 app.use(express.json());
-// app.use(bodyParser.json())
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("views"));
 
