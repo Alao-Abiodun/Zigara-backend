@@ -51,3 +51,17 @@ exports.login = catchAsync(async (req, res, next) => {
         token
     })
 })
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+    //1) get user based on email
+    const user = await User.findOne({ email: req.body.email })
+    if (!user) {
+        return next(new AppError("There is no user with that email address", 404));
+    }
+    //2)generate random token and send back as email
+
+    res.status(200).json({
+        status: 'success',
+        message: "A password reset mail have been set to you"
+    })
+})
