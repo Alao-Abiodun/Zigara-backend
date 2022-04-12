@@ -38,8 +38,7 @@ passport.use(new LinkedinStrategy({
         profilepicture: profilePicture,
         googleId: "",
         linkedinId: profile.id,
-        facebookId: '',
-        userId: uuid.v4()
+        facebookId: ''
     })
     done(null, newUser)
 
