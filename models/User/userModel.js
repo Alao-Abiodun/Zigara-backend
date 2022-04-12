@@ -13,8 +13,7 @@ const userSchema = new schema({
     profilepicture: String,
     googleId: String, 
     linkedinId: String,
-    facebookId: String,
-    userId: String
+    facebookId: String
 })
 
 const User = mongoose.model('user', userSchema)

@@ -3,13 +3,15 @@ const bcrypt = require('bcryptjs')
 const User = require('../../models/User/userModel')
 const response = require('../../utils/libs/response')
 const Joi = require('joi')
+const uuid = require('uuid')
+const jwt = require('jsonwebtoken')
 
 // Register Validation schema
 const registrationSchema = Joi.object({
     firstName: Joi.string().required(), 
     lastName: Joi.string().required(), 
     email: Joi.string().email().required(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().min(8).required(),
     phone: Joi.number().required()
 })
 
@@ -19,33 +21,65 @@ const loginSchema = Joi.object({
     password: Joi.string().required().min(8)
 })
 
+// token
+const createToken = async (payload) => {
+    return jwt.sign(payload, `${process.env.cookieKey}`, {
+        expiresIn: 6 * 60 * 60
+    })
+} 
+
 // Authentication
-const registerUser = (req, res) => {
+const registerUser = async (req, res) => {
     validateUser(registrationSchema)
-    // Continue with registration logic
-    //Please Note: While creating a new user, use assign from the model userId: uuid.v4() 
+    const userExist = await User.findOne({ email: req.body.email })
+    if(userExist) return response.errorResMsg(res, 400, { message: "User with this email already exist" })
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(req.body.password, salt)
+    const newUser = await User.create({
+        firstname: req.body.firstName,
+        lastname: req.body.lastName,
+        email: req.body.email,
+        password: hashPassword,
+        phonenumber: req.body.phone,
+        country: "",
+        state: "",
+        bio: "",
+        profilepicture: "",
+        googleId: "", 
+        linkedinId: "",
+        facebookId: ""
+    })
+    return response.successResMsg(res, 201, { message: newUser })
 }
 
-const loginUser = (req, res) => {
+const loginUser = async (req, res) => {
     validateUser(loginSchema)
-    // Continue with login logic
+    const user = await User.findOne({ email: req.body.email })
+    if(!user) return response.errorResMsg(res, 400, { message: "Invalid login details" })
+    const confirmPassword = await bcrypt.compare(req.body.password, user.password)
+    if(!confirmPassword) return response.errorResMsg(res, 400, { message: "Invalid login details" })
+    const signature = await createToken({
+        _id: user._id, 
+        email: user.email
+    })
+    return response.successResMsg(res, 201, { message: signature })
 }
 
 
-const resetPassword = async (req, res) => {
-    // Authentication (req.user), then get mail from hash for findUser function below
-    // Put all the reset password functions under the authorization check (req.user)
-    const {userId, email, oldPassword, newPasswordOne, newPasswordTwo } = req.body
-    if(newPasswordOne !== newPasswordTwo){
-        return res.status(400).json({ message: "Password does not match" })
-    }
-    const findUser = await User.findOne({ email })
-    const isValid = await bcrypt.compare(oldPassword, findUser.password)
-    if(!isValid) return res.status(400).json({ message: "Invalid password input" })
+const resetPasswordSetting = async (req, res) => {
+    const user = req.user
+    if(!user) return response.errorResMsg(res, 400, { message: "User not found" })
+    const findUser = await User.findById(user._id)
+    if(!findUser) return response.errorResMsg(res, 400, { message: "User profile not found" })
+    const {oldPassword, newPasswordOne, newPasswordTwo } = req.body
+    if(newPasswordOne !== newPasswordTwo) return response.errorResMsg(res, 400, { message: "Password does not match" })
+    const getUser = await User.findOne({ _id: findUser._id })
+    const isValid = await bcrypt.compare(oldPassword, getUser.password)
+    if(!isValid) return response.errorResMsg(res, 400, { message: "Please input your correct password" })
     const salt = await bcrypt.genSalt(10)
     const newPasswordHash = await bcrypt.hash(newPasswordOne, salt)
     await User.updateOne(
-        {userId: userId },
+        { _id: findUser._id },
         {$set: {password: newPasswordHash}},
         { new: true }
     )     
@@ -53,30 +87,37 @@ const resetPassword = async (req, res) => {
 }
 
 const updateProfile = async (req, res) => {
-    // Authentication (req.user), then get mail from hash for findUser function below
-    // Put all the reset password functions under the authorization check (req.user)
-    const userId = req.params.userid
-    const findUser = await User.findOne({ userId })
+    const user = req.user
+    if(!user) return response.errorResMsg(res, 400, { message: "User not found" })
+    const findUser = await User.findById(user._id)
+    if(!findUser) return response.errorResMsg(res, 400, { message: "User profile not found" })
     const { firstName, lastName, phoneNumber, country, state, bio } = req.body
-    if(findUser){
-        //firstname, lastname, phone number, country, state, bio
-        findUser.firstname = firstName,
-        findUser.lastname = lastName,
-        findUser.phonenumber = phoneNumber,
-        findUser.country = country,
-        findUser.state = state, 
-        findUser.bio = bio
+    await User.updateOne({ _id: findUser._id }, {
+        firstname: firstName,
+        lastname: lastName,
+        phonenumber: phoneNumber,
+        country,
+        state,
+        bio
+    })
+    return response.successResMsg(res, 201, { message: "User profile has been updated successfully" })
+}
 
-        const savedUser = await findUser.save()
-        return response.successResMsg(res, 201, { message: "User profile has been updated successfully", savedUser })
-    } 
-    return response.successResMsg(res, 400, { message: "User profile not found" })
+
+const getProfile = async (req, res) => {
+    const user = req.user
+    if(!user) return response.errorResMsg(res, 400, { message: "User not found" })
+    const findUser = await User.findById(user._id)
+    if(!findUser) return response.errorResMsg(res, 400, { message: "Couldn't find user" })
+    const getUser = await User.findOne({ _id: user._id })
+    return response.successResMsg(res, 200, { message: getUser })
 }
 
 
 module.exports = {
     registerUser,
     loginUser,
-    resetPassword,
-    updateProfile
+    resetPasswordSetting,
+    updateProfile,
+    getProfile
 }

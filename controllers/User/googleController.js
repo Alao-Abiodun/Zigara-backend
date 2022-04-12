@@ -2,6 +2,7 @@ const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth2').Strategy
 const User = require('../../models/User/userModel')
 const uuid = require('uuid')
+require('dotenv').config()
 
 passport.serializeUser((user, done) => {
     done(null, user.userId)
@@ -17,32 +18,33 @@ passport.use(
     new GoogleStrategy({
         clientID: `${process.env.googleClientId}`,
         clientSecret: `${process.env.googleClientSecret}`,
-        callbackURL: `/auth/google/redirect`,
+        // callbackURL: `/auth/google/redirect`,
+        callbackURL: `${process.env.googleCallbackURL}`,
         scope: ['email', 'profile']
     }, async (accessToken, refreshToken, profile, done) => {
         console.log("Google Call back fired")
         console.log(profile)
         const findUser = await User.findOne({ googleId: profile.id })
         if(findUser){
+            console.log(`Find user ${findUser}`)
             done(null, findUser)
         }
         else{
             const newUser = User.create({
                 firstname: profile.name.givenName,
                 lastname: profile.name.familyName,
-                email: "",
+                email: profile._json.email,
                 password: "",
                 phonenumber: "",
                 country: "",
                 state: "",
                 bio: "",
-                // profilepicture: profile._json.image.url,
-                profilepicture: profile.coverPhoto,
+                profilepicture: profile._json.picture,
                 googleId: profile.id,
                 linkedinId: "",
-                facebookId: '',
-                userId: uuid.v4()
+                facebookId: ''
             })
+            console.log(`New User ${newUser}`)
             done(null, newUser)
         }
     }
