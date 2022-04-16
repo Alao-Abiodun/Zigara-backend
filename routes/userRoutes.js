@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const passport = require('passport')
+const paystack = require('../controllers/Payment/paymentController')
 const userController = require('../controllers/User/userController')
 const { validateAuth } = require('../middleware/validator')
 
@@ -35,6 +36,14 @@ router.post('/updateprofile', validateAuth, userController.updateProfile)
 
 
 router.get('/logout', (req, res) => res.send("logging out"))
+
+
+// Paystack Payment
+// pay with paystack
+router.post('/paystack/pay', validateAuth, paystack.paystackPayment)
+
+// verify paystack payment
+router.get('/paystack/callback/:reference', paystack.paystackVerify)
 
 
 module.exports = router
