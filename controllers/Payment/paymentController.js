@@ -15,7 +15,8 @@ const paymentSchema = Joi.object({
     paymentType: Joi.string().required(), 
     email: Joi.string().required(), 
     fullname: Joi.string().required(),
-    amount: Joi.number().required()
+    amount: Joi.number().required(),
+    serviceId: Joi.string().required()
 })
 
 
@@ -37,7 +38,7 @@ const paymentPlatform = async (req, res) => {
 
 // Using Paystack
 const paystackPayment = async (req, res, findUser) => {
-    const findServiceOrder = await Service.findOne({ _id: serviceId })
+    const findServiceOrder = await Service.findOne({ _id: req.body.serviceId })
     if(!findServiceOrder) return errorResMsg(res, 400, { message: "Please include a service order Id" })
     const form = _.pick(req.body,['amount','email','fullname']);
     console.log(form)
