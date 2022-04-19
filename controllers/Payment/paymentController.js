@@ -1,22 +1,46 @@
-const { initializePayment, verifyPayment } = require('./Paystack')
 const { errorResMsg, successResMsg } = require('../../utils/libs/response')
 const orderModel = require('../../models/Payment/orderModel')
+const validateUser = require('../../utils/validations/index')
 const User = require('../../models/User/userModel.js')
 const Service = require('../../models/service.model')
 const _ = require('lodash')
 const dotenv = require('dotenv')
 const request = require('request')
+const axios = require('axios')
 dotenv.config()
+const Joi = require('joi')
 
-// Using Paystack
-const paystackPayment = async (req, res) => {
+// Payment schema
+const paymentSchema = Joi.object({
+    paymentType: Joi.string().required(), 
+    email: Joi.string().required(), 
+    fullname: Joi.string().required(),
+    amount: Joi.number().required()
+})
+
+
+// Payment
+const paymentPlatform = async (req, res) => {
     const user = req.user
     if(!user) return errorResMsg(res, 400, { message: "User not found" })
     const findUser = await User.findById(user._id)
     if(!findUser) return errorResMsg(res, 400, { message: "User profile not found" })
+
+    validateUser(paymentSchema)
+    const paymentTypeArray = ["paystack", "flutterwave"];
+    if (!paymentTypeArray.includes(req.body.paymentType.toLowerCase())) return errorResMsg(res, 400, "Please provide a valid payment type")
+    if (req.body.paymentType.toLowerCase() === "paystack") {
+        await paystackPayment(req, res, findUser)
+    }
+}
+
+
+// Using Paystack
+const paystackPayment = async (req, res, findUser) => {
     const findServiceOrder = await Service.findOne({ _id: serviceId })
     if(!findServiceOrder) return errorResMsg(res, 400, { message: "Please include a service order Id" })
     const form = _.pick(req.body,['amount','email','fullname']);
+    console.log(form)
     form.metadata = {
         fullname : form.fullname
     }
@@ -30,6 +54,7 @@ const paystackPayment = async (req, res) => {
         },
         form  
     }
+    console.log(findUser)
     request.post(options, async (error, response, body) => {
         if(error) return errorResMsg(res, 400, { message: error })
         const jsonData = JSON.parse(body)
@@ -48,6 +73,7 @@ const paystackPayment = async (req, res) => {
 }
 
 
+// Verify Paystack payment
 const paystackVerify = async (req, res) => {
     // const reference = req.query.reference
     const reference = req.params.reference
@@ -66,7 +92,7 @@ const paystackVerify = async (req, res) => {
         if(response.data.status == "abandoned" || response.data.status == "Abandoned") return errorResMsg(res, 400, { message: "Your transaction is not yet complete" })
         const findTxn = await orderModel.findOne({ reference })
         if(!findTxn) return errorResMsg(res, 400, { message: "Transaction cannot be found" })
-        const findOrder = await orderModel.updateOne(
+        await orderModel.updateOne(
             { reference: findTxn.reference },
             {$set: {isActive: true}},
             { new: true }
@@ -77,6 +103,6 @@ const paystackVerify = async (req, res) => {
 }
 
 module.exports = {
-    paystackPayment,
+    paymentPlatform,
     paystackVerify
 }
