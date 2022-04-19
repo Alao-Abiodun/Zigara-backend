@@ -13,7 +13,7 @@ const validateAuth = (req, res, next) => {
         if (err) {
           return false;
         } else {
-          // console.log(decoded)
+          // console.log(decoded) 
           req.user = decoded;
           next();
         }
