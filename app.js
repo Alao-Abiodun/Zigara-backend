@@ -14,7 +14,7 @@ const linkedinPassport = require("./controllers/User/LinkedinController");
 const passport = require("passport");
 const cookieSession = require("cookie-session");
 
-const authRouter = require("./routes/user");
+const userRouter = require("./routes/user");
 const serviceRouter = require("./routes/scheduleService.route");
 const AppError = require("./utils/libs/appError");
 const globalErrorHandler = require("./controllers/errorController");
@@ -49,7 +49,8 @@ app.use(cors());
 app.set("view engine", "ejs");
 app.use(express.json());
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
+
 app.use(express.static("views"));
 
 app.use(
@@ -80,9 +81,9 @@ app.get("/api/v1/home", (req, res) => {
 });
 
 //   Routes Middleware
-app.use("/api/v1/auth", authRouter);
+// app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/service", serviceRouter);
-// app.use("/api/v1/user", userRouter);
+app.use("/api/v1/user", userRouter);
 
 // adminRouter(app);
 
