@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     country: String,
     state: String,
     bio: String,
-    profilephoto: String,
+    profilepicture: String,
     googleId: String,
     linkedIn: String,
     facebookId: String

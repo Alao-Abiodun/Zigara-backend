@@ -21,18 +21,20 @@ router.get('/auth/google/redirect', passport.authenticate('google'), (req, res) 
 router.get('/auth/linkedin', passport.authenticate('linkedin', {
     scope: ['r_emailaddress', 'r_liteprofile']
 }))
-router.get('/auth/linkedin/redirect', passport.authenticate('linkedin', {failureRedirect: '/'}), (req, res) => {
-    res.status(201).json({ message: "User Logged In successfully"})
+router.get('/auth/linkedin/redirect', passport.authenticate('linkedin', { failureRedirect: '/' }), (req, res) => {
+    res.status(201).json({ message: "User Logged In successfully" })
 })
 
 // USER PROFILE
 // Get user details
-router.get('/profile', validateAuth, userController.getProfile)
+// router.get('/profile', validateAuth, userController.getProfile)
+router.get('/profile/:id', userController.getProfile)
 // Password update
 router.post('/passwordsetting', validateAuth, userController.resetPasswordSetting)
 
 // Profile update
-router.post('/updateprofile', validateAuth, userController.updateProfile)
+// router.post('/updateprofile', validateAuth, userController.updateProfile)
+router.post('/updateprofile', userController.updateProfile)
 
 
 router.get('/logout', (req, res) => res.send("logging out"))
