@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const riderController = require('../controllers/riderController')
 
+router.post('/createrider', riderController.registerRider)
 
 router.get('/getriders', riderController.getAllRidersDetails)
 

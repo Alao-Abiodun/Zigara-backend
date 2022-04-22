@@ -21,5 +21,8 @@ const email2 = 'name@companyName.com'
 const email3 = 'no-email-whatsoever'
 const email4 = 'name@personal.com'
 
+const name = 'Tobe'
+const last = 'Leta'
+console.log(`${name}.${last}@zigara.com`)
 
 emailCheck(email, Role)
