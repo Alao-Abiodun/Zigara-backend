@@ -6,19 +6,19 @@ cloudinary.config({
   api_secret: process.env.ZIGARA_CLOUDINARY_API_SECRET,
 });
 
-const cloudinaryUploadMethod = async file => {
-  return new Promise(resolve => {
-      cloudinary.uploader.upload( file , (err, res) => {
-        if (err) return res.status(500).send("upload file error")
-          // console.log( res.secure_url )
-          resolve({
-            res: res.secure_url
-          }) 
-        }
-      ) 
-  })
-};
+// const cloudinaryUploadMethod = async file => {
+//   return new Promise(resolve => {
+//     cloudinary.uploader.upload(file, (err, res) => {
+//       // if (err) return res.status(500).send("upload file error")
+//       console.log(res.secure_url)
+//       resolve({
+//         res: res.secure_url
+//       })
+//     }
+//     )
+//   })
+// };
 
 module.exports = {
-  cloudinaryUploadMethod
+  cloudinary
 }
