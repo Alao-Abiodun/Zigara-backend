@@ -6,7 +6,7 @@ const { validateAuth } = require('../middleware/validator')
 
 // AUTHENTICATION
 // User registration and login
-router.post('/register', userController.registerUser)
+router.post('/register', userController.registerPersonnel)
 router.post('/login', userController.loginUser)
 
 // User google authentication routes
