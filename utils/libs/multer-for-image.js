@@ -9,6 +9,17 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
+  },
+  fileFilter: (req, file, cb) => {
+    let ext = path.extname(file.originalname);
+    if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
+      cb(new Error(`File type is not supported, must be a .png or .jpg or .jpeg`), false);
+      return;
+    }
+    cb(null, true);
+  },
+  limits: {
+    fileSize: maxSize
   }
 })
 // multer({
@@ -24,7 +35,7 @@ const storage = multer.diskStorage({
 //       return;
 //     }
 //     cb(null, true);
-//   },
+// },
 //   limits: { fileSize: maxSize }
 
 // });
