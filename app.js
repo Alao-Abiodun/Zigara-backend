@@ -9,6 +9,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const key = require("./utils/libs/gen-key");
 const userRoutes = require("./routes/userRoutes");
 const contactRoutes = require("./routes/contactRoutes");
+const adminRoutes = require("./routes/riderRoutes")
 const googlePassport = require("./controllers/User/googleController");
 const linkedinPassport = require("./controllers/User/LinkedinController");
 const passport = require("passport");
@@ -89,6 +90,7 @@ app.use("/api/v1/user", userRouter);
 
 app.use(userRoutes);
 app.use(contactRoutes);
+app.use(adminRoutes);
 
 // Unhandled Routes
 app.all("*", (req, res) => {

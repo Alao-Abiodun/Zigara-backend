@@ -1,9 +1,10 @@
 const validateUser = require('../../utils/validations/index')
 const bcrypt = require('bcryptjs')
 const User = require('../../models/User/userModel')
+const Admin = require('../../models/User/adminModel')
 const response = require('../../utils/libs/response')
 const Joi = require('joi')
-const uuid = require('uuid')
+const Roles = require("../../middleware/role")
 const jwt = require('jsonwebtoken')
 
 // Register Validation schema
@@ -14,6 +15,18 @@ const registrationSchema = Joi.object({
     password: Joi.string().min(8).required(),
     phone: Joi.number().required()
 })
+
+// Validate user/admin
+function emailCheck(email, role) {
+    var regExp = new RegExp("[a-z0-9\.-_]*@zigara\.com$", "i");
+    match = email.match(regExp);
+    if(match){
+        role = Roles.Admin
+    }
+    else{
+        role = Roles.User
+    }
+}
 
 // login Validation schema
 const loginSchema = Joi.object({
@@ -29,27 +42,56 @@ const createToken = async (payload) => {
 }
 
 // Authentication
-const registerUser = async (req, res) => {
+const registerPersonnel = async (req, res) => {
     validateUser(registrationSchema)
-    const userExist = await User.findOne({ email: req.body.email })
-    if (userExist) return response.errorResMsg(res, 400, { message: "User with this email already exist" })
+    let userRole;
+    emailCheck(req.body.email, userRole)
+    if(userRole === Roles.User){
+        const userExist = await User.findOne({ email: req.body.email })
+        if (userExist) return response.errorResMsg(res, 400, { message: "User with this email already exist" })
+    }
+
+    if(userRole === Roles.Admin){
+        const riderExist = await Admin.findOne({ email: req.body.email })
+        if (riderExist) return response.errorResMsg(res, 400, { message: "Admin with this email already exist" })
+    }
+
     const salt = await bcrypt.genSalt(10)
     const hashPassword = await bcrypt.hash(req.body.password, salt)
-    const newUser = await User.create({
-        firstname: req.body.firstName,
-        lastname: req.body.lastName,
-        email: req.body.email,
-        password: hashPassword,
-        phonenumber: req.body.phone,
-        country: "",
-        state: "",
-        bio: "",
-        profilepicture: "",
-        googleId: "",
-        linkedinId: "",
-        facebookId: ""
-    })
-    return response.successResMsg(res, 201, { message: newUser })
+
+    if(userRole === Roles.User){
+        const newUser = await User.create({
+            firstname: req.body.firstName,
+            lastname: req.body.lastName,
+            email: req.body.email,
+            password: hashPassword,
+            phonenumber: req.body.phone,
+            role: userRole,
+            country: "",
+            state: "",
+            bio: "",
+            profilepicture: "",
+            googleId: "",
+            linkedinId: "",
+            facebookId: ""
+        })
+        return response.successResMsg(res, 201, { message: newUser })
+    }
+    else {
+        const newUser = await Admin.create({
+            firstname: req.body.firstName,
+            lastname: req.body.lastName,
+            email: req.body.email,
+            password: hashPassword,
+            phonenumber: req.body.phone,
+            role: userRole,
+            route: req.body.route,
+            active: false,
+            profilepicture: "",
+            NoOfTrips: 0
+        })
+        return response.successResMsg(res, 201, { message: newUser })
+    }
 }
 
 const loginUser = async (req, res) => {
@@ -60,7 +102,8 @@ const loginUser = async (req, res) => {
     if (!confirmPassword) return response.errorResMsg(res, 400, { message: "Invalid login details" })
     const signature = await createToken({
         _id: user._id,
-        email: user.email
+        email: user.email,
+        role: user.role
     })
     return response.successResMsg(res, 201, { message: signature })
 }
@@ -90,10 +133,9 @@ const updateProfile = async (req, res) => {
     const user = req.body
     console.log(user)
     // const user = req.user
-    const findUser = await User.findById(user)
+    const findUser = await User.findById(user._id)
     // if (!user) return response.errorResMsg(res, 400, { message: "User not found" })
     if (!findUser) return response.errorResMsg(res, 400, { message: "User profile not found" })
-    console.log(req.body)
     const { firstName, lastName, phoneNumber, country, state, bio, image } = req.body
     console.log({ firstName, lastName, phoneNumber, country, state, bio, image })
     await User.updateOne({ _id: findUser._id }, {
@@ -122,7 +164,7 @@ const getProfile = async (req, res) => {
 
 
 module.exports = {
-    registerUser,
+    registerPersonnel,
     loginUser,
     resetPasswordSetting,
     updateProfile,
