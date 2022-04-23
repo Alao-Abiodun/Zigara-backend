@@ -10,3 +10,4 @@ router.post("/schedule", validateAuth, serviceScheduleCtrl.scheduleService);
 router.post("/create", serviceScheduleCtrl.createService);
 
 module.exports = router;
+ 

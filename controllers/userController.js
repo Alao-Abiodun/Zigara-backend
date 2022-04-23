@@ -16,9 +16,9 @@ exports.getProfile = catchAsync(async (req, res) => {
 
 
 exports.updateProfile = catchAsync(async (req, res) => {
-    // console.log("That route")
-    const data = req.file.path
-    const user = req.user
+    console.log("That route")
+    // const data = req.file.path
+    // const user = req.user
 
     const findUser = await User.findById(user._id)
     if (!findUser) return response.errorResMsg(res, 400, { message: "User profile not found" })

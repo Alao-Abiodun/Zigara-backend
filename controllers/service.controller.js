@@ -3,6 +3,7 @@ const catchAsync = require("../utils/libs/catchAsync");
 const AppError = require("../utils/libs/appError");
 const { errorResMsg, successResMsg } = require("../utils/libs/response");
 
+
 exports.scheduleService = catchAsync(async (req, res, next) => {
   try {
     console.log(req.user);
@@ -17,7 +18,7 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
     if (serviceType === "pickup_and_delivery") {
       const { pickupDetails, dropoffPoint, itemType, meansOfTransport } =
         req.body;
-      if (meansOfTransport !== "bike" || meansOfTransport !== "van") {
+      if (meansOfTransport !== "bike" && meansOfTransport !== "van") {
         return next(
           new AppError("Please provide valid means of transport", 400)
         );
@@ -39,7 +40,7 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
     } else if (serviceType === "packing_and_moving") {
       const { pickupDetails, dropoffPoint, itemType, meansOfTransport } =
         req.body;
-      if (meansOfTransport !== "bike" || meansOfTransport !== "van") {
+      if (meansOfTransport !== "bike" && meansOfTransport !== "van") {
         return next(
           new AppError("Please provide valid means of transport", 400)
         );

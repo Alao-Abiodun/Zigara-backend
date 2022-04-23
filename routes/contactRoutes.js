@@ -5,4 +5,4 @@ const contactController = require('../controllers/ContactUs/contactController')
 
 router.get('/contact', contactController.contactUsHandler)
 
-module.exports = router
+module.exports = router 

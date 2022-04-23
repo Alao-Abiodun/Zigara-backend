@@ -8,12 +8,12 @@ const router = express.Router()
 
 
 
-router.post('/forgotpassword', authController.forgotPassword)
+// router.post('/forgotpassword', authController.forgotPassword)
 
 router.post('/signup', authController.signup)
 router.post('/login', authController.login)
 
 router.get('/profile', authController.protect, userController.getProfile);
-router.post('/updateProfile', uploadImg, authController.protect, userController.updateProfile)
+router.post('/updateprofile', uploadImg, userController.updateProfile)
 
 module.exports = router 

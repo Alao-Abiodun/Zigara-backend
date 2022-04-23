@@ -8,7 +8,7 @@ router.get('/getriders', riderController.getAllRidersDetails)
 
 router.get('/getrider/:id', riderController.getRiderDetails)
 
-router.put('/update-rider-status/:id'. riderController.updateRiderStatus)
+router.put('/update-rider-status/:id', riderController.updateRiderStatus)
 
 router.put('/updaterider/:id', riderController.updateRider)
 

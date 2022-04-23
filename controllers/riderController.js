@@ -2,6 +2,7 @@ const Admin = require('../models/User/adminModel')
 const { errorResMsg, successResMsg } = require('../utils/libs/response')
 const validateUser = require('../utils/validations/index')
 const role = require('../middleware/role')
+const Joi = require('joi')
 
 // Rider registration schema
 const registrationSchema = Joi.object({

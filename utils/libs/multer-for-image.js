@@ -3,41 +3,23 @@ const path = require("path");
 
 // Multer config
 const maxSize = 10000000;
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, '/uploads');
+const imageStorage = multer.diskStorage({
+  destination: function(req, file, cb){
+      cb(null, 'images')
   },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
+  filename: function(req, file, cb){
+      cb(null, file.originalname)
   },
   fileFilter: (req, file, cb) => {
     let ext = path.extname(file.originalname);
+    console.log(file)
+    console.log(ext)
     if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
       cb(new Error(`File type is not supported, must be a .png or .jpg or .jpeg`), false);
-      return;
     }
-    cb(null, true);
+    return; 
   },
-  limits: {
-    fileSize: maxSize
-  }
-})
-// multer({
-//   storage: multer.diskStorage({ destination: function (req, file, cb) {
-//     cb(null, '/uploads');
-//   }}),
-//   fileFilter: (req, file, cb) => {
-//     // console.log({ file });
-//     let ext = path.extname(file.originalname);
-//     console.log(path.dirname(file))
-//     if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
-//       cb(new Error(`File type is not supported, must be a .png or .jpg or .jpeg`), false);
-//       return;
-//     }
-//     cb(null, true);
-// },
-//   limits: { fileSize: maxSize }
+  limits: { fileSize: maxSize }
+}) 
 
-// });
-
-module.exports = multer({ storage: storage }).single('image');;
+module.exports = multer({ storage: imageStorage }).single('image')
