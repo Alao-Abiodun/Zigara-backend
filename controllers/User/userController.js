@@ -1,4 +1,6 @@
 const validateUser = require('../../utils/validations/index')
+const dotenv = require("dotenv");
+dotenv.config();
 const bcrypt = require('bcryptjs')
 const User = require('../../models/User/userModel')
 const Admin = require('../../models/User/adminModel')
@@ -11,8 +13,6 @@ const path = require('path')
 const { cloudinary } = require('../../utils/libs/cloudinaryUpload')
 const crypto = require("crypto")
 const { sendGmail } = require('../../utils/libs/email')
-const dotenv = require('dotenv')
-dotenv.config()
 
 // Register Validation schema
 const registrationSchema = Joi.object({
