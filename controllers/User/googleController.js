@@ -5,11 +5,11 @@ const uuid = require('uuid')
 require('dotenv').config()
 
 passport.serializeUser((user, done) => {
-    done(null, user.userId)
+    done(null, user.id)
 })
 
 passport.deserializeUser((id, done) => {
-    User.findOne({ userId: id }).then((user) => {
+    User.findOne({ _id: id }).then((user) => {
         done(null, user)
     })
 })

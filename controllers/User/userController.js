@@ -2,12 +2,17 @@ const validateUser = require('../../utils/validations/index')
 const bcrypt = require('bcryptjs')
 const User = require('../../models/User/userModel')
 const Admin = require('../../models/User/adminModel')
+const Token = require('../../models/tokenModel')
 const response = require('../../utils/libs/response')
 const Joi = require('joi')
 const Roles = require("../../middleware/role")
 const jwt = require('jsonwebtoken')
 const path = require('path')
 const { cloudinary } = require('../../utils/libs/cloudinaryUpload')
+const crypto = require("crypto")
+const { sendGmail } = require('../../utils/libs/email')
+const dotenv = require('dotenv')
+dotenv.config()
 
 // Register Validation schema
 const registrationSchema = Joi.object({
@@ -186,8 +191,43 @@ const getProfile = async (req, res) => {
 const forgotPassword = async (req, res) => {
     const findUser = await User.findOne({ email: req.body.email })
     if(!findUser) return response.errorResMsg(res, 400, { message: "User does not exist" })
-    // Generate random token and send to email
+    let findToken = await Token.findOne({ user: findUser.id })
+    if(!findToken){
+        findToken = await Token.create({
+            user: findUser.id,
+            token: crypto.randomBytes(32).toString('hex')
+        })
+    }
+    const link = `${process.env.BASE_URL}/password-reset/${findUser.id}/${findToken.token}`
+    let mailOptions = {
+        fromEmail: `${process.env.GMAIL_ADDRESS}`,
+        toEmail: req.body.email,
+        subject: "Password Reset Request",
+        text: link
+    }
+    await sendGmail(mailOptions)
     return response.successResMsg(res, 200, { message: "A password reset mail have been set to you" })
+}
+
+const setNewPassword = async (req, res) => {
+    const schema = Joi.object({ password: Joi.string().required() })
+    validateUser(schema)
+    const userId = req.params.id
+    const tokenId = req.params.token
+    const findUser = await User.findById(userId)
+    if(!findUser) return response.errorResMsg(res, 400, { message: "Invalid link" })
+    let findToken = await Token.findOne({
+        user: findUser._id,
+        token: tokenId
+    }) 
+    if(!findToken) return response.errorResMsg(res, 400, { message: "Invalid link" })
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(req.body.password, salt)
+    console.log(hashPassword)
+    await User.updateOne({ _id: userId }, {
+        password: hashPassword
+    })
+    return successResMsg(res, 201, { message: "Your password has been updated successfully", findUser })
 }
 
 

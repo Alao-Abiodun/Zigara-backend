@@ -50,7 +50,7 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
         pickupDetails,
         dropoffPoint,
         itemType,
-        meansOfTransport,
+        meansOfTransport, 
         user: req.user.id,
       });
       await newService.save();

@@ -51,7 +51,7 @@ const paystackPayment = async (req, res, findUser) => {
         headers: {
             authorization: `${process.env.PaystackSK}`,
             "content-type": "application/json",
-            "cache-control": "no-cache"
+            "cache-control": "no-cache" 
         },
         form  
     }
@@ -76,8 +76,8 @@ const paystackPayment = async (req, res, findUser) => {
 
 // Verify Paystack payment
 const paystackVerify = async (req, res) => {
-    // const reference = req.query.reference
-    const reference = req.params.reference
+    const reference = req.query.reference
+    // const reference = req.params.reference
     const options = {
         url: 'https://api.paystack.co/transaction/verify/'+encodeURIComponent(reference),
         headers: {

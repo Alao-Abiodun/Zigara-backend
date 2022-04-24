@@ -42,7 +42,7 @@ router.post('/updateuserprofile', validateAuth, upload, userController.updatePro
 router.post('/pay', validateAuth, payment.paymentPlatform)
 
 // verify paystack payment
-router.get('/paystack/callback/:reference', payment.paystackVerify)
+router.get('/paystack/callback', payment.paystackVerify)
 
 // USER LOGOUT
 router.get('/logout', (req, res) => res.send("logging out"))

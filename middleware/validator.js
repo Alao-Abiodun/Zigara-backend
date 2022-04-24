@@ -16,7 +16,6 @@ const validateAuth = async (req, res, next) => {
         if (err) {
           return false;
         } else {
-          // console.log(decoded) 
           req.user = decoded;
           next();
         }
