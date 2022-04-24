@@ -7,9 +7,9 @@ const serviceSchema = new Schema({
   pickupDetails: {
     fullName: {
       type: String,
-    },
+    }, 
     location: {
-      type: String,
+      type: String, 
     },
     email: {
       type: String,
@@ -38,7 +38,7 @@ const serviceSchema = new Schema({
   },
   user: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: "user",
   },
 });
 

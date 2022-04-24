@@ -14,7 +14,6 @@ const googlePassport = require("./controllers/User/googleController");
 const linkedinPassport = require("./controllers/User/LinkedinController");
 const passport = require("passport");
 const cookieSession = require("cookie-session");
-
 const userRouter = require("./routes/user");
 const serviceRouter = require("./routes/scheduleService.route");
 const AppError = require("./utils/libs/appError");
@@ -49,7 +48,7 @@ app.use(cors());
 
 app.set("view engine", "ejs");
 app.use(express.json({ limit: '50mb' }));
-
+app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.use(express.static("views"));

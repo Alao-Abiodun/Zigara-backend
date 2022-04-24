@@ -5,11 +5,11 @@ const uuid = require('uuid')
 require('dotenv').config()
 
 passport.serializeUser((user, done) => {
-    done(null, user.userId)
+    done(null, user.id)
 })
 
 passport.deserializeUser((id, done) => {
-    User.findOne({ userId: id }).then((user) => {
+    User.findOne({ _id: id }).then((user) => {
         done(null, user)
     })
 })
@@ -18,7 +18,6 @@ passport.use(
     new GoogleStrategy({
         clientID: `${process.env.googleClientId}`,
         clientSecret: `${process.env.googleClientSecret}`,
-        // callbackURL: `/auth/google/redirect`,
         callbackURL: `${process.env.googleCallbackURL}`,
         scope: ['email', 'profile']
     }, async (accessToken, refreshToken, profile, done) => {

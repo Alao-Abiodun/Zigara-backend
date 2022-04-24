@@ -2,10 +2,17 @@ const validateUser = require('../../utils/validations/index')
 const bcrypt = require('bcryptjs')
 const User = require('../../models/User/userModel')
 const Admin = require('../../models/User/adminModel')
+const Token = require('../../models/tokenModel')
 const response = require('../../utils/libs/response')
 const Joi = require('joi')
 const Roles = require("../../middleware/role")
 const jwt = require('jsonwebtoken')
+const path = require('path')
+const { cloudinary } = require('../../utils/libs/cloudinaryUpload')
+const crypto = require("crypto")
+const { sendGmail } = require('../../utils/libs/email')
+const dotenv = require('dotenv')
+dotenv.config()
 
 // Register Validation schema
 const registrationSchema = Joi.object({
@@ -15,18 +22,6 @@ const registrationSchema = Joi.object({
     password: Joi.string().min(8).required(),
     phone: Joi.number().required()
 })
-
-// Validate user/admin
-function emailCheck(email, role) {
-    var regExp = new RegExp("[a-z0-9\.-_]*@zigara\.com$", "i");
-    match = email.match(regExp);
-    if(match){
-        role = Roles.Admin
-    }
-    else{
-        role = Roles.User
-    }
-}
 
 // login Validation schema
 const loginSchema = Joi.object({
@@ -41,11 +36,18 @@ const createToken = async (payload) => {
     })
 }
 
-// Authentication
+// Authentication (Registration for both User and Admin)
 const registerPersonnel = async (req, res) => {
     validateUser(registrationSchema)
     let userRole;
-    emailCheck(req.body.email, userRole)
+    var regExp = new RegExp("[a-z0-9\.-_]*@zigara\.com$", "i");
+    const match = req.body.email.match(regExp);
+    if(match){
+        userRole = Roles.Admin
+    }
+    else {
+        userRole = Roles.User
+    }
     if(userRole === Roles.User){
         const userExist = await User.findOne({ email: req.body.email })
         if (userExist) return response.errorResMsg(res, 400, { message: "User with this email already exist" })
@@ -60,7 +62,7 @@ const registerPersonnel = async (req, res) => {
     const hashPassword = await bcrypt.hash(req.body.password, salt)
 
     if(userRole === Roles.User){
-        const newUser = await User.create({
+        await User.create({
             firstname: req.body.firstName,
             lastname: req.body.lastName,
             email: req.body.email,
@@ -75,10 +77,10 @@ const registerPersonnel = async (req, res) => {
             linkedinId: "",
             facebookId: ""
         })
-        return response.successResMsg(res, 201, { message: newUser })
+        return response.successResMsg(res, 201, { message: "User has successfully been created" })
     }
     else {
-        const newUser = await Admin.create({
+        await Admin.create({
             firstname: req.body.firstName,
             lastname: req.body.lastName,
             email: req.body.email,
@@ -90,25 +92,49 @@ const registerPersonnel = async (req, res) => {
             profilepicture: "",
             NoOfTrips: 0
         })
-        return response.successResMsg(res, 201, { message: newUser })
+        return response.successResMsg(res, 201, { message: "An Admin account has successfully been created" })
     }
 }
 
-const loginUser = async (req, res) => {
+// Handle login for both User and Admin
+const loginPersonnel = async (req, res) => {
     validateUser(loginSchema)
-    const user = await User.findOne({ email: req.body.email })
-    if (!user) return response.errorResMsg(res, 400, { message: "Invalid login details" })
-    const confirmPassword = await bcrypt.compare(req.body.password, user.password)
-    if (!confirmPassword) return response.errorResMsg(res, 400, { message: "Invalid login details" })
-    const signature = await createToken({
-        _id: user._id,
-        email: user.email,
-        role: user.role
-    })
-    return response.successResMsg(res, 201, { message: signature })
+    let userRole;
+    var regExp = new RegExp("[a-z0-9\.-_]*@zigara\.com$", "i");
+    const match = req.body.email.match(regExp);
+    if(match){
+        userRole = Roles.Admin
+    }
+    else {
+        userRole = Roles.User
+    }
+    if(userRole === Roles.User){
+        const user = await User.findOne({ email: req.body.email })
+        if (!user) return response.errorResMsg(res, 400, { message: "Invalid login details" })
+        const confirmPassword = await bcrypt.compare(req.body.password, user.password)
+        if (!confirmPassword) return response.errorResMsg(res, 400, { message: "Invalid login details" })
+        const signature = await createToken({
+            _id: user._id,
+            email: user.email,
+            role: user.role
+        })
+        return response.successResMsg(res, 201, { message: signature })
+    }
+    else{
+        const admin = await Admin.findOne({ email: req.body.email, role: Roles.Admin  })
+        if (!admin) return response.errorResMsg(res, 400, { message: "Invalid login details" })
+        const confirmPassword = await bcrypt.compare(req.body.password, admin.password)
+        if (!confirmPassword) return response.errorResMsg(res, 400, { message: "Invalid login details" })
+        const signature = await createToken({
+            _id: admin._id,
+            email: admin.email,
+            role: admin.role
+        })
+        return response.successResMsg(res, 201, { message: signature })
+    }
 }
 
-
+// Reset password screen
 const resetPasswordSetting = async (req, res) => {
     const user = req.user
     if (!user) return response.errorResMsg(res, 400, { message: "User not found" })
@@ -125,48 +151,91 @@ const resetPasswordSetting = async (req, res) => {
         { _id: findUser._id },
         { $set: { password: newPasswordHash } },
         { new: true }
-    )
+    ) 
     return response.successResMsg(res, 201, { message: "Password was successfully updated" })
 }
 
+// Update profile screen
 const updateProfile = async (req, res) => {
-    const user = req.body
-    console.log(user)
-    // const user = req.user
+    const user = req.user
+    if (!user) return response.errorResMsg(res, 400, { message: "User not found" })
     const findUser = await User.findById(user._id)
-    // if (!user) return response.errorResMsg(res, 400, { message: "User not found" })
     if (!findUser) return response.errorResMsg(res, 400, { message: "User profile not found" })
-    const { firstName, lastName, phoneNumber, country, state, bio, image } = req.body
-    console.log({ firstName, lastName, phoneNumber, country, state, bio, image })
+    const { firstName, lastName, phoneNumber, country, state, bio } = req.body
+    const data = req.file.path
+    const filePath = path.join(__dirname, `../../${data}`)
+    console.log(filePath)
+    const uploadedResponse = await cloudinary.uploader.upload(filePath);
     await User.updateOne({ _id: findUser._id }, {
         firstname: firstName,
         lastname: lastName,
-        phonenumber: phoneNumber,
+        phonenumber: phoneNumber, 
         country,
         state,
         bio,
-        profilepicture: image
+        profilepicture: uploadedResponse.secure_url
     })
-    return response.successResMsg(res, 201, { message: "User profile has been updated successfully" })
+    return response.successResMsg(res, 201, { message: "User profile has been updated successfully", findUser })
+}
+ 
+// Get User profile
+const getProfile = async (req, res) => {
+    const user = req.user
+    if (!user) return response.errorResMsg(res, 400, { message: "User not found" })
+    const findUser = await User.findById(user._id)
+    if (!findUser) return response.errorResMsg(res, 400, { message: "User profile not found" })
+    return response.successResMsg(res, 200, { message: findUser })
 }
 
+// Forgot password screen
+const forgotPassword = async (req, res) => {
+    const findUser = await User.findOne({ email: req.body.email })
+    if(!findUser) return response.errorResMsg(res, 400, { message: "User does not exist" })
+    let findToken = await Token.findOne({ user: findUser.id })
+    if(!findToken){
+        findToken = await Token.create({
+            user: findUser.id,
+            token: crypto.randomBytes(32).toString('hex')
+        })
+    }
+    const link = `${process.env.BASE_URL}/password-reset/${findUser.id}/${findToken.token}`
+    let mailOptions = {
+        fromEmail: `${process.env.GMAIL_ADDRESS}`,
+        toEmail: req.body.email,
+        subject: "Password Reset Request",
+        text: link
+    }
+    await sendGmail(mailOptions)
+    return response.successResMsg(res, 200, { message: "A password reset mail have been set to you" })
+}
 
-const getProfile = async (req, res) => {
-    // console.log('hello twitter')
-    const user = req.params.id
-    // const user = req.user 
-    if (!user) return response.errorResMsg(res, 400, { message: "User not found" })
-    const findUser = await User.findById(user)
-    if (!findUser) return response.errorResMsg(res, 400, { message: "Couldn't find user" })
-    // const getUser = await User.findOne({ _id: user._id })
-    return response.successResMsg(res, 200, { message: findUser })
+const setNewPassword = async (req, res) => {
+    const schema = Joi.object({ password: Joi.string().required() })
+    validateUser(schema)
+    const userId = req.params.id
+    const tokenId = req.params.token
+    const findUser = await User.findById(userId)
+    if(!findUser) return response.errorResMsg(res, 400, { message: "Invalid link" })
+    let findToken = await Token.findOne({
+        user: findUser._id,
+        token: tokenId
+    }) 
+    if(!findToken) return response.errorResMsg(res, 400, { message: "Invalid link" })
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(req.body.password, salt)
+    console.log(hashPassword)
+    await User.updateOne({ _id: userId }, {
+        password: hashPassword
+    })
+    return successResMsg(res, 201, { message: "Your password has been updated successfully", findUser })
 }
 
 
 module.exports = {
     registerPersonnel,
-    loginUser,
+    loginPersonnel,
     resetPasswordSetting,
     updateProfile,
-    getProfile
+    getProfile,
+    forgotPassword
 }
