@@ -4,6 +4,7 @@ const path = require("path");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
+dotenv.config();
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const key = require("./utils/libs/gen-key");
@@ -20,7 +21,6 @@ const AppError = require("./utils/libs/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const { successResMsg } = require("./utils/libs/response");
 
-dotenv.config();
 
 if (process.env.NODE_ENV === "production") {
   process.env.ZIGARA_ACCESS_TOKEN_SECRET = key(64);
