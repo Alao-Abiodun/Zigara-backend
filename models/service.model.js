@@ -1,46 +1,55 @@
 const { Schema, model } = require("mongoose");
 
-const serviceSchema = new Schema({
-  serviceType: {
-    type: String,
-  },
-  pickupDetails: {
-    fullName: {
-      type: String,
-    }, 
-    location: {
-      type: String, 
-    },
-    email: {
+const serviceSchema = new Schema(
+  {
+    serviceType: {
       type: String,
     },
-  },
-  dropoffPoint: {
-    fullName: {
-      type: String,
+    pickupDetails: {
+      fullName: {
+        type: String,
+      },
+      location: {
+        type: String,
+      },
+      email: {
+        type: String,
+      },
     },
-    location: {
-      type: String,
+    dropoffPoint: {
+      fullName: {
+        type: String,
+      },
+      location: {
+        type: String,
+      },
+      email: {
+        type: String,
+      },
+      phoneNumber: {
+        type: String,
+      },
     },
-    email: {
-      type: String,
+    itemType: {
+      type: [],
     },
-    phoneNumber: {
+    meansOfTransport: {
       type: String,
+      enum: ["bike", "van"],
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+    },
+    date: {
+      type: Date,
+      default: Date.now,
     },
   },
-  itemType: {
-    type: [],
-  },
-  meansOfTransport: {
-    type: String,
-    enum: ["bike", "van"],
-  },
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
-  },
-});
+  {
+    timeStamps: true,
+  }
+);
 
 const serviceModel = model("Service", serviceSchema);
 

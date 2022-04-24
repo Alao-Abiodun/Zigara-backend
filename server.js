@@ -1,25 +1,22 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
+require("dotenv").config();
+const mongoose = require("mongoose");
 // const chalk = require('chalk')
 
 // UNCAUGHT EXCEPTIONS
 // Application needs to be crashed then a tool will be needed to restart the APP
-process.on('uncaughtException', (err) => {
-  console.log('UNCAUGHT EXCEPTION!...');
+process.on("uncaughtException", (err) => {
+  console.log("UNCAUGHT EXCEPTION!...");
   console.log({ err });
   console.log(err.name, err.message);
   process.exit();
 });
 
-const app = require('./app');
+const app = require("./app");
 
-// const DB = process.env.ZIGARA_DB_URL
-// process.env.ZIGARA_DB.replace(
-//   '<password>',
-//   process.env.ZIGARA_PASSWORD
-// );
+const DB = process.env.ZIGARA_DB;
+process.env.ZIGARA_DB.replace("<password>", process.env.ZIGARA_PASSWORD);
 
-const DB = `${process.env.START_MONGODB}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}${process.env.END_MONGODB}`
+// const DB = `${process.env.START_MONGODB}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}${process.env.END_MONGODB}`
 
 mongoose
   .connect(DB, {
@@ -29,12 +26,12 @@ mongoose
     useFindAndModify: false,
   })
   .then(() => {
-    console.log('Connected to DB successfully...');
+    console.log("Connected to DB successfully...");
   });
 
-mongoose.connection.on('error', (err) => console.log(err.message));
-mongoose.connection.on('disconnected', () =>
-  console.log('Mongoose connection closed')
+mongoose.connection.on("error", (err) => console.log(err.message));
+mongoose.connection.on("disconnected", () =>
+  console.log("Mongoose connection closed")
 );
 
 //   START SERVER
@@ -55,7 +52,7 @@ const normalizePort = (val) => {
   return false;
 };
 
-const port = normalizePort(process.env.PORT || '8888');
+const port = normalizePort(process.env.PORT || "8888");
 
 /**
  * Event listener for HTTP server "listening" event.
@@ -64,15 +61,15 @@ const port = normalizePort(process.env.PORT || '8888');
 // create a http server
 const server = app.listen(port, async () => {
   const address = server.address();
-  const bind = typeof address === 'string' ? `pipe ${address}` : `port ${port}`;
+  const bind = typeof address === "string" ? `pipe ${address}` : `port ${port}`;
   console.log(`Listening on ${bind}`);
 });
 
 // Catching Exceptions
 
 // Application does not necessarily need to be crashed
-process.on('unhandledRejection', (err) => {
-  console.log('UNHANDLED REJECTION!...');
+process.on("unhandledRejection", (err) => {
+  console.log("UNHANDLED REJECTION!...");
   console.log(err.name, err.message);
   console.log({ err });
   server.close(() => {
@@ -80,7 +77,7 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-process.on('SIGINT', async () => {
+process.on("SIGINT", async () => {
   await mongoose.connection.close();
   process.exit(0);
 });

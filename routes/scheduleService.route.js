@@ -1,4 +1,6 @@
 const express = require("express");
+const { authorize } = require("../middleware/index");
+const Role = require("../middleware/role");
 
 const router = express.Router();
 
@@ -7,7 +9,10 @@ const { validateAuth } = require("../middleware/validator");
 
 router.post("/schedule", validateAuth, serviceScheduleCtrl.scheduleService);
 
-router.post("/create", serviceScheduleCtrl.createService);
+router.get(
+  "/orders",
+  authorize(Role.Admin),
+  serviceScheduleCtrl.getAllServices
+);
 
 module.exports = router;
- 
