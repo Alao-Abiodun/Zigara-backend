@@ -31,7 +31,7 @@ const loginSchema = Joi.object({
 
 // token
 const createToken = async (payload) => {
-    return jwt.sign(payload, `${process.env.cookieKey}`, {
+    return jwt.sign(payload, `${process.env.ZIGARA_ACCESS_TOKEN_SECRET}`, {
         expiresIn: 6 * 60 * 60
     })
 }
