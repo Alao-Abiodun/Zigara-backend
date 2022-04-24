@@ -3,7 +3,6 @@ const catchAsync = require("../utils/libs/catchAsync");
 const AppError = require("../utils/libs/appError");
 const { errorResMsg, successResMsg } = require("../utils/libs/response");
 
-
 exports.scheduleService = catchAsync(async (req, res, next) => {
   try {
     console.log(req.user);
@@ -50,7 +49,7 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
         pickupDetails,
         dropoffPoint,
         itemType,
-        meansOfTransport, 
+        meansOfTransport,
         user: req.user.id,
       });
       await newService.save();
@@ -66,6 +65,44 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.createService = catchAsync(async (req, res, next) => {
-  console.log("working");
+// get all services order using aggregate method
+exports.getAllServices = catchAsync(async (req, res, next) => {
+  try {
+    const services = await Service.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          dropoffPoint: 1,
+          itemType: 1,
+          user: {
+            phonenumber: 1,
+            country: 1,
+          },
+        },
+      },
+    ]);
+    const dataInfo = {
+      message: "All services",
+      services,
+    };
+    return successResMsg(res, 200, dataInfo);
+  } catch (error) {
+    console.log(error.message);
+    return errorResMsg(res, 500, error.message);
+  }
 });
+
+// get all
