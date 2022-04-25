@@ -43,7 +43,7 @@ const registerPersonnel = async (req, res) => {
     var regExp = new RegExp("[a-z0-9\.-_]*@zigara\.com$", "i");
     const match = req.body.email.match(regExp);
     if(match){
-        userRole = Roles.Admin
+        userRole = Roles.Admin  
     }
     else {
         userRole = Roles.User
@@ -237,5 +237,6 @@ module.exports = {
     resetPasswordSetting,
     updateProfile,
     getProfile,
-    forgotPassword
+    forgotPassword,
+    setNewPassword
 }
