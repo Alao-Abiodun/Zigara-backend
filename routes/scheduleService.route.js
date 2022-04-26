@@ -9,10 +9,8 @@ const { validateAuth } = require("../middleware/validator");
 
 router.post("/schedule", validateAuth, serviceScheduleCtrl.scheduleService);
 
-router.get(
-  "/orders",
-  authorize(Role.Admin),
-  serviceScheduleCtrl.getAllServices
-);
+router.get("/orders", serviceScheduleCtrl.getAllServices);
+
+// router.get("/orders", serviceScheduleCtrl.getAllOrders);
 
 module.exports = router;
