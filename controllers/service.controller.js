@@ -1,4 +1,5 @@
 const Service = require("../models/service.model");
+const Order = require("../models/Payment/order.model");
 const catchAsync = require("../utils/libs/catchAsync");
 const AppError = require("../utils/libs/appError");
 const { errorResMsg, successResMsg } = require("../utils/libs/response");
@@ -30,6 +31,23 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
         meansOfTransport,
         user: req.user.id,
       });
+
+      // add Service details to order model
+      const orderDetails = {
+        client: req.user.firstname,
+        owners_contact: req.user.phonenumber,
+        package: itemType,
+        reciever: pickupDetails.fullName,
+        drop_off: dropoffPoint.location,
+      };
+
+      const order = new Order({
+        orderDetails,
+        status: "Pending",
+      });
+
+      await order.save();
+
       await newService.save();
       const dataInfo = {
         message: "Service scheduled successfully",
@@ -52,6 +70,28 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
         meansOfTransport,
         user: req.user.id,
       });
+
+      // console.log("firstname:", req.user.firstname);
+
+      // const orderDetails = {
+      //   client: req.user.firstname,
+      //   owners_contact: req.user.phonenumber,
+      //   package: itemType,
+      //   reciever: pickupDetails.fullName,
+      //   drop_off: dropoffPoint.location,
+      // };
+
+      const order = new Order({
+        client: req.user.firstname,
+        owners_contact: req.user.phonenumber,
+        package: itemType,
+        reciever: pickupDetails.fullName,
+        drop_off: dropoffPoint.location,
+        status: "Pending",
+      });
+
+      await order.save();
+
       await newService.save();
       const dataInfo = {
         message: "Service scheduled successfully",
@@ -64,6 +104,16 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
     return errorResMsg(res, 500, error.message);
   }
 });
+
+// get all orders from orders model
+// exports.getAllOrders = catchAsync(async (req, res, next) => {
+//   const orders = await Order.find();
+//   const dataInfo = {
+//     message: "All orders",
+//     orders,
+//   };
+//   return successResMsg(res, 200, dataInfo);
+// });
 
 // get all services order using aggregate method
 exports.getAllServices = catchAsync(async (req, res, next) => {
@@ -87,9 +137,11 @@ exports.getAllServices = catchAsync(async (req, res, next) => {
         $project: {
           dropoffPoint: 1,
           itemType: 1,
+          fullName: 1,
+          location: 1,
           user: {
             phonenumber: 1,
-            country: 1,
+            firstname: 1,
           },
         },
       },
