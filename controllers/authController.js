@@ -1,13 +1,12 @@
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
+dotenv.config();
 const User = require('../models/userModel');
 const catchAsync = require('../utils/libs/catchAsync')
 const AppError = require('../utils/libs/appError');
 const signToken = require('../utils/libs/jwt-helper');
 const response = require('../utils/libs/response.js');
-
-dotenv.config({ path: './config.env' });
 
 exports.signup = catchAsync(async (req, res, next) => {
 

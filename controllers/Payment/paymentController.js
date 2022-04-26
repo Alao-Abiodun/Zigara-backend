@@ -1,13 +1,13 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const { errorResMsg, successResMsg } = require('../../utils/libs/response')
 const orderModel = require('../../models/Payment/orderModel')
 const validateUser = require('../../utils/validations/index')
 const User = require('../../models/User/userModel.js')
 const Service = require('../../models/service.model')
 const _ = require('lodash')
-const dotenv = require('dotenv')
 const request = require('request')
 const axios = require('axios')
-dotenv.config()
 const Joi = require('joi')
 
 // Payment schema

@@ -4,12 +4,14 @@ const path = require("path");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
+dotenv.config();
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const key = require("./utils/libs/gen-key");
 const userRoutes = require("./routes/userRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const adminRoutes = require("./routes/riderRoutes")
+const notificationRoutes = require('./routes/notificationRoutes')
 const googlePassport = require("./controllers/User/googleController");
 const linkedinPassport = require("./controllers/User/LinkedinController");
 const passport = require("passport");
@@ -20,7 +22,6 @@ const AppError = require("./utils/libs/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const { successResMsg } = require("./utils/libs/response");
 
-dotenv.config();
 
 if (process.env.NODE_ENV === "production") {
   process.env.ZIGARA_ACCESS_TOKEN_SECRET = key(64);
@@ -89,6 +90,7 @@ app.use("/api/v1/user", userRouter);
 
 app.use(userRoutes);
 app.use(contactRoutes);
+app.use(notificationRoutes);
 app.use(adminRoutes);
 
 // Unhandled Routes

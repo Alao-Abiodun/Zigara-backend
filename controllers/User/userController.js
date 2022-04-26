@@ -1,4 +1,6 @@
 const validateUser = require('../../utils/validations/index')
+const dotenv = require("dotenv");
+dotenv.config();
 const bcrypt = require('bcryptjs')
 const User = require('../../models/User/userModel')
 const Admin = require('../../models/User/adminModel')
@@ -11,8 +13,6 @@ const path = require('path')
 const { cloudinary } = require('../../utils/libs/cloudinaryUpload')
 const crypto = require("crypto")
 const { sendGmail } = require('../../utils/libs/email')
-const dotenv = require('dotenv')
-dotenv.config()
 
 // Register Validation schema
 const registrationSchema = Joi.object({
@@ -31,7 +31,7 @@ const loginSchema = Joi.object({
 
 // token
 const createToken = async (payload) => {
-    return jwt.sign(payload, `${process.env.cookieKey}`, {
+    return jwt.sign(payload, `${process.env.ZIGARA_ACCESS_TOKEN_SECRET}`, {
         expiresIn: 6 * 60 * 60
     })
 }
@@ -43,7 +43,7 @@ const registerPersonnel = async (req, res) => {
     var regExp = new RegExp("[a-z0-9\.-_]*@zigara\.com$", "i");
     const match = req.body.email.match(regExp);
     if(match){
-        userRole = Roles.Admin
+        userRole = Roles.Admin  
     }
     else {
         userRole = Roles.User
@@ -237,5 +237,6 @@ module.exports = {
     resetPasswordSetting,
     updateProfile,
     getProfile,
-    forgotPassword
+    forgotPassword,
+    setNewPassword
 }
