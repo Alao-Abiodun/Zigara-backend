@@ -13,10 +13,10 @@ process.on("uncaughtException", (err) => {
 
 const app = require("./app");
 
-//const DB = process.env.ZIGARA_DB_URL;
+const DB = process.env.ZIGARA_DB_URL;
 // process.env.ZIGARA_DB.replace("<password>", process.env.ZIGARA_PASSWORD);
 
-const DB = `${process.env.START_MONGODB}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}${process.env.END_MONGODB}`
+//const DB = `${process.env.START_MONGODB}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}${process.env.END_MONGODB}`
 
 mongoose
   .connect(DB, {
