@@ -10,7 +10,7 @@ const orderSchema = new Schema(
       type: String,
     },
     package: {
-      type: String,
+      type: [],
     },
     reciever: {
       type: String,

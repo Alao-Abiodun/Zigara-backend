@@ -9,7 +9,7 @@ const { validateAuth } = require("../middleware/validator");
 
 router.post("/schedule", validateAuth, serviceScheduleCtrl.scheduleService);
 
-router.get("/orders", serviceScheduleCtrl.getAllServices);
+router.get("/orders", validateAuth, serviceScheduleCtrl.getAllServices);
 
 // router.get("/orders", serviceScheduleCtrl.getAllOrders);
 

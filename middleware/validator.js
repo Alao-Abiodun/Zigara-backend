@@ -19,8 +19,8 @@ const validateAuth = async (req, res, next) => {
           next();
         }  
       }
-    );
-  } else {
+    ); 
+  } else { 
     return response.errorResMsg(res, 400, { message: "Authorization failed" });
   }
 };

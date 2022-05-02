@@ -210,24 +210,26 @@ const forgotPassword = async (req, res) => {
 }
 
 const setNewPassword = async (req, res) => {
-    const schema = Joi.object({ password: Joi.string().required() })
+    const schema = Joi.object({ 
+        password: Joi.string().required()
+    })
     validateUser(schema)
     const userId = req.params.id
     const tokenId = req.params.token
     const findUser = await User.findById(userId)
+    console.log(findUser)
     if(!findUser) return response.errorResMsg(res, 400, { message: "Invalid link" })
     let findToken = await Token.findOne({
-        user: findUser._id,
+        user: findUser._id, 
         token: tokenId
     }) 
     if(!findToken) return response.errorResMsg(res, 400, { message: "Invalid link" })
     const salt = await bcrypt.genSalt(10)
     const hashPassword = await bcrypt.hash(req.body.password, salt)
-    console.log(hashPassword)
     await User.updateOne({ _id: userId }, {
         password: hashPassword
     })
-    return successResMsg(res, 201, { message: "Your password has been updated successfully", findUser })
+    return response.successResMsg(res, 201, { message: "Your password has been updated successfully", findUser })
 }
 
 
