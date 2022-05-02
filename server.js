@@ -21,7 +21,7 @@ const DB = `${process.env.START_MONGODB}${process.env.MONGODB_USERNAME}:${proces
 mongoose
   .connect(DB, {
     useNewUrlParser: true,
-    useCreateIndex: true,
+    useCreateIndex: true, 
     useUnifiedTopology: true,
     useFindAndModify: false,
   })

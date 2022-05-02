@@ -17,7 +17,7 @@ passport.deserializeUser((id, done) => {
 passport.use(new LinkedinStrategy({
     clientID: `${process.env.linkedinClientId}`,
     clientSecret: `${process.env.linkedinClientSecret}`,
-    callbackURL: '/auth/linkedin/redirect',
+    callbackURL: `${process.env.linkedinCallbackURL}`,
     scope: ['r_emailaddress', 'r_liteprofile']
 }, async (accessToken, refreshToken, profile, done) => {
     console.log('Linkedin Callback fired')
@@ -31,7 +31,7 @@ passport.use(new LinkedinStrategy({
         firstname: profile.name.givenName,
         lastname: profile.name.familyName,
         email: emailResult,
-        password: "",
+        password: "",   
         phonenumber: "",
         country: "",
         state: "",
