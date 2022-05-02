@@ -16,11 +16,11 @@ const googlePassport = require("./controllers/User/googleController");
 const linkedinPassport = require("./controllers/User/LinkedinController");
 const passport = require("passport");
 const cookieSession = require("cookie-session");
-const userRouter = require("./routes/user");
 const serviceRouter = require("./routes/scheduleService.route");
 const AppError = require("./utils/libs/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const { successResMsg } = require("./utils/libs/response");
+//const userRouter = require("./routes/user");
 
 
 if (process.env.NODE_ENV === "production") {
@@ -84,7 +84,7 @@ app.get("/api/v1/home", (req, res) => {
 //   Routes Middleware
 // app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/service", serviceRouter);
-app.use("/api/v1/user", userRouter);
+// app.use("/api/v1/user", userRouter);
 
 // adminRouter(app);
 

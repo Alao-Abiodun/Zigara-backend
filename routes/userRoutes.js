@@ -51,7 +51,7 @@ router.get('/logout', (req, res) => res.send("logging out"))
 router.post('/forgotpassword', userController.forgotPassword)
 
 // Forgot password
-router.post('/setnewpassword', userController.setNewPassword)
+router.post('/password-reset/:id/:token', userController.setNewPassword)
 
 
 module.exports = router

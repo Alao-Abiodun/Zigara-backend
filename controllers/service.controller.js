@@ -1,12 +1,13 @@
 const Service = require("../models/service.model");
 const Order = require("../models/Payment/order.model");
 const catchAsync = require("../utils/libs/catchAsync");
+const role = require("../middleware/role")
 const AppError = require("../utils/libs/appError");
 const { errorResMsg, successResMsg } = require("../utils/libs/response");
 
 exports.scheduleService = catchAsync(async (req, res, next) => {
   try {
-    console.log(req.user);
+    console.log(req.user); 
     let serviceType = req.body.serviceType;
     if (!serviceType) {
       return next(new AppError("Please provide service type", 400));
@@ -81,6 +82,9 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
       //   drop_off: dropoffPoint.location,
       // };
 
+      console.log(newService)
+      console.log("Bla")
+
       const order = new Order({
         client: req.user.firstname,
         owners_contact: req.user.phonenumber,
@@ -89,6 +93,8 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
         drop_off: dropoffPoint.location,
         status: "Pending",
       });
+
+      console.log(order)
 
       await order.save();
 
@@ -112,7 +118,7 @@ exports.scheduleService = catchAsync(async (req, res, next) => {
 //     message: "All orders",
 //     orders,
 //   };
-//   return successResMsg(res, 200, dataInfo);
+//   return successResMsg(res, 200, dataInfo); 
 // });
 
 // get all services order using aggregate method
